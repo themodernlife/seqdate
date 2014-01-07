@@ -15,7 +15,9 @@ case object Years extends StepType
 class Conf(args: List[String]) extends ScallopConf(args) {
   val inputFormat  = opt[String]("in-format", 'i') map(DateTimeFormat.forPattern(_)) orElse Some(ISODateTimeFormat.date)
   val outputFormat = opt[String]("out-format", 'o') map(DateTimeFormat.forPattern(_)) orElse Some(ISODateTimeFormat.date)
-  val timeZone     = opt[String]("time-zone", 'z') map(DateTimeZone.forID(_)) orElse Some(DateTimeZone.UTC)
+  /*
+  val timeZone     = opt[String]("time-zone", 'z') map(DateTimeZone.forID(_)) orElse Some(DateTimeZone.UTC) // FIXME
+  */
   val startDate    = trailArg[String]("start-date").flatMap(sd => inputFormat.map(DateTime.parse(sd, _)))
   val endDate      = trailArg[String]("end-date").flatMap(ed => inputFormat.map(DateTime.parse(ed, _)))
   val stepAmount   = trailArg[Int]("step", default = Some(1))
@@ -32,9 +34,7 @@ object SeqDate extends App {
   val conf = new Conf(args.toList)
 
   def loop(cur: DateTime, end: DateTime, step: Int, stepType: StepType, data: List[DateTime] = Nil): List[DateTime] = {
-    if (!cur.isBefore(end)) {
-      data.reverse
-    } else {
+    if (cur.isBefore(end)) {
       val next = stepType match {
         case Minutes => cur.plusMinutes(step)
         case Hours   => cur.plusHours(step)
@@ -42,7 +42,9 @@ object SeqDate extends App {
         case Months  => cur.plusMonths(step)
         case Years   => cur.plusYears(step)
       }
-      loop(next, end, step, stepType, next :: data)
+      loop(next, end, step, stepType, cur :: data)
+    } else {
+      data.reverse
     }
   }
 

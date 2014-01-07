@@ -28,3 +28,9 @@ libraryDependencies += "org.joda"           % "joda-convert"       % "1.2"
 
 libraryDependencies += "org.rogach" %% "scallop" % "0.9.4"
 
+
+
+
+
+packageArchetype.java_application
+
